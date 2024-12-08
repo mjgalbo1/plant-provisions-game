@@ -19,12 +19,17 @@ const items = ['sandwich.png', 'wrap.png', 'salad.png'];
 const basketImg = new Image();
 basketImg.src = 'basket.png';
 
+// Keyboard controls
+let rightPressed = false;
+let leftPressed = false;
+
+// Mobile button controls
+let isMovingLeft = false;
+let isMovingRight = false;
+
 // Handle keyboard input
 document.addEventListener('keydown', keyDownHandler);
 document.addEventListener('keyup', keyUpHandler);
-
-let rightPressed = false;
-let leftPressed = false;
 
 function keyDownHandler(e) {
   if (e.key === 'Right' || e.key === 'ArrowRight') {
@@ -42,6 +47,21 @@ function keyUpHandler(e) {
   }
 }
 
+// Mobile button event listeners
+document.getElementById('leftBtn').addEventListener('touchstart', function() {
+  isMovingLeft = true;
+});
+document.getElementById('leftBtn').addEventListener('touchend', function() {
+  isMovingLeft = false;
+});
+
+document.getElementById('rightBtn').addEventListener('touchstart', function() {
+  isMovingRight = true;
+});
+document.getElementById('rightBtn').addEventListener('touchend', function() {
+  isMovingRight = false;
+});
+
 // Create falling items
 function createFallingItem() {
   const item = {
@@ -58,11 +78,15 @@ function createFallingItem() {
 
 // Move the basket
 function moveBasket() {
-  if (rightPressed && basket.x < canvas.width - basket.width) {
-    basket.x += basket.dx;
+  if (rightPressed || isMovingRight) {
+    if (basket.x < canvas.width - basket.width) {
+      basket.x += basket.dx;
+    }
   }
-  if (leftPressed && basket.x > 0) {
-    basket.x -= basket.dx;
+  if (leftPressed || isMovingLeft) {
+    if (basket.x > 0) {
+      basket.x -= basket.dx;
+    }
   }
 }
 
