@@ -14,41 +14,55 @@ let score = 0;
 let lives = 3;
 let gameOver = false;
 
-// Image assets
+// Vegan items image
 const items = ['sandwich.png', 'wrap.png', 'salad.png'];
 const basketImg = new Image();
 basketImg.src = 'basket.png';
 
-basketImg.onload = function() {
-  startGame();
-};
+// Keyboard controls
+let rightPressed = false;
+let leftPressed = false;
 
-const gameModal = document.getElementById('game-modal');
-const scoreDisplay = document.getElementById('score');
+// Mobile button controls
+let isMovingLeft = false;
+let isMovingRight = false;
 
-// Event listeners for controls
+// Handle keyboard input
 document.addEventListener('keydown', keyDownHandler);
 document.addEventListener('keyup', keyUpHandler);
-window.addEventListener('resize', resizeCanvas);
 
 function keyDownHandler(e) {
-  if (e.key === 'Right' || e.key === 'ArrowRight') rightPressed = true;
-  if (e.key === 'Left' || e.key === 'ArrowLeft') leftPressed = true;
+  if (e.key === 'Right' || e.key === 'ArrowRight') {
+    rightPressed = true;
+  } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
+    leftPressed = true;
+  }
 }
 
 function keyUpHandler(e) {
-  if (e.key === 'Right' || e.key === 'ArrowRight') rightPressed = false;
-  if (e.key === 'Left' || e.key === 'ArrowLeft') leftPressed = false;
+  if (e.key === 'Right' || e.key === 'ArrowRight') {
+    rightPressed = false;
+  } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
+    leftPressed = false;
+  }
 }
 
-function resizeCanvas() {
-  const aspectRatio = 800 / 600;
-  const width = Math.min(window.innerWidth, 800);
-  const height = width / aspectRatio;
-  canvas.width = width;
-  canvas.height = height;
-}
+// Mobile button event listeners
+document.getElementById('leftBtn').addEventListener('touchstart', function() {
+  isMovingLeft = true;
+});
+document.getElementById('leftBtn').addEventListener('touchend', function() {
+  isMovingLeft = false;
+});
 
+document.getElementById('rightBtn').addEventListener('touchstart', function() {
+  isMovingRight = true;
+});
+document.getElementById('rightBtn').addEventListener('touchend', function() {
+  isMovingRight = false;
+});
+
+// Create falling items
 function createFallingItem() {
   const item = {
     x: Math.random() * (canvas.width - 40),
@@ -62,38 +76,60 @@ function createFallingItem() {
   fallingItems.push(item);
 }
 
+// Move the basket
 function moveBasket() {
-  if (rightPressed) basket.x += basket.dx;
-  if (leftPressed) basket.x -= basket.dx;
+  if (rightPressed || isMovingRight) {
+    if (basket.x < canvas.width - basket.width) {
+      basket.x += basket.dx;
+    }
+  }
+  if (leftPressed || isMovingLeft) {
+    if (basket.x > 0) {
+      basket.x -= basket.dx;
+    }
+  }
 }
 
+// Draw the basket
 function drawBasket() {
   ctx.drawImage(basketImg, basket.x, basket.y, basket.width, basket.height);
 }
 
+// Draw falling items
 function drawItems() {
   fallingItems.forEach(item => {
     ctx.drawImage(item.img, item.x, item.y, item.width, item.height);
   });
 }
 
+// Move falling items
 function moveItems() {
   fallingItems.forEach(item => {
     item.y += item.dy;
 
+    // Check if item falls below the basket
     if (item.y + item.height > canvas.height) {
       fallingItems.splice(fallingItems.indexOf(item), 1);
       lives--;
-      if (lives === 0) gameOver = true;
+      if (lives === 0) {
+        gameOver = true;
+      }
     }
 
-    if (item.x > basket.x && item.x < basket.x + basket.width && item.y + item.height > basket.y) {
+    // Check if item is caught
+    if (
+      item.x > basket.x &&
+      item.x < basket.x + basket.width &&
+      item.y + item.height > basket.y &&
+      item.y < basket.y + basket.height
+    ) {
       fallingItems.splice(fallingItems.indexOf(item), 1);
       score++;
     }
   });
 }
 
+// Update game state
 function update() {
   if (!gameOver) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -101,21 +137,61 @@ function update() {
     moveItems();
     drawBasket();
     drawItems();
+    ctx.font = '20px Arial';
+    ctx.fillStyle = '#388e3c';
+    ctx.fillText('Score: ' + score, 10, 20);
+    ctx.fillText('Lives: ' + lives, 10, 50);
+
     requestAnimationFrame(update);
   } else {
-    scoreDisplay.innerText = score;
-    gameModal.style.display = 'flex';
+    document.getElementById('score').innerText = score;
+    document.getElementById('game-over').style.display = 'block';
   }
 }
 
+// Start the game
 function startGame() {
-  console.log("Game started");
-  resizeCanvas();
   score = 0;
   lives = 3;
   gameOver = false;
   fallingItems = [];
-  gameModal.style.display = 'none';
   setInterval(createFallingItem, 1000);
   update();
 }
+
+// Restart the game
+function restartGame() {
+  document.getElementById('game-over').style.display = 'none';
+  startGame();
+}
+
+// Resize the canvas to be responsive
+function resizeCanvas() {
+  const aspectRatio = 800 / 600; // Width to height ratio of the game
+  const width = Math.min(window.innerWidth, 800); // Restrict to 800px max width
+  const height = width / aspectRatio;
+
+  // Resize the canvas to fit the device screen
+  canvas.width = width;
+  canvas.height = height;
+
+  // Adjust the basket's position relative to the new canvas size
+  basket.width = canvas.width * 0.1; // Basket width relative to canvas
+  basket.height = canvas.height * 0.07; // Basket height relative to canvas
+  basket.y = canvas.height - basket.height - 10; // Position basket near the bottom
+  basket.dx = canvas.width * 0.02; // Movement speed based on canvas size
+
+  // Resize and reposition falling items
+  fallingItems.forEach(item => {
+    item.width = canvas.width * 0.05;
+    item.height = canvas.height * 0.05;
+  });
+}
+
+// Call resizeCanvas on window resize
+window.addEventListener('resize', resizeCanvas);
+
+// Resize canvas initially
+resizeCanvas();
+
+startGame();
