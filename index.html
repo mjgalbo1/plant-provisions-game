@@ -1,79 +1,190 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Plant Provisions Catch Game</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #e8f5e9; /* Light green background */
-      overflow: hidden;
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+// Game variables
+let basket = {
+  x: canvas.width / 2 - 40,
+  y: canvas.height - 60,
+  width: 80,
+  height: 40,
+  dx: 7
+};
+let fallingItems = [];
+let score = 0;
+let lives = 3;
+let gameOver = false;
+
+// Vegan items image
+const items = ['sandwich.png', 'wrap.png', 'salad.png'];
+const basketImg = new Image();
+basketImg.src = 'basket.png';
+
+// Keyboard controls
+let rightPressed = false;
+let leftPressed = false;
+
+// Mobile button controls
+let isMovingLeft = false;
+let isMovingRight = false;
+
+// Handle keyboard input
+document.addEventListener('keydown', keyDownHandler);
+document.addEventListener('keyup', keyUpHandler);
+
+function keyDownHandler(e) {
+  if (e.key === 'Right' || e.key === 'ArrowRight') {
+    rightPressed = true;
+  } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
+    leftPressed = true;
+  }
+}
+
+function keyUpHandler(e) {
+  if (e.key === 'Right' || e.key === 'ArrowRight') {
+    rightPressed = false;
+  } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
+    leftPressed = false;
+  }
+}
+
+// Mobile button event listeners
+document.getElementById('leftBtn').addEventListener('touchstart', function() {
+  isMovingLeft = true;
+});
+document.getElementById('leftBtn').addEventListener('touchend', function() {
+  isMovingLeft = false;
+});
+
+document.getElementById('rightBtn').addEventListener('touchstart', function() {
+  isMovingRight = true;
+});
+document.getElementById('rightBtn').addEventListener('touchend', function() {
+  isMovingRight = false;
+});
+
+// Create falling items
+function createFallingItem() {
+  const item = {
+    x: Math.random() * (canvas.width - 40),
+    y: 0,
+    width: 40,
+    height: 40,
+    dy: 3,
+    img: new Image()
+  };
+  item.img.src = items[Math.floor(Math.random() * items.length)];
+  fallingItems.push(item);
+}
+
+// Move the basket
+function moveBasket() {
+  if (rightPressed || isMovingRight) {
+    if (basket.x < canvas.width - basket.width) {
+      basket.x += basket.dx;
     }
-    canvas {
-      display: block;
-      margin: 0 auto;
-      background-color: #ffffff; /* White canvas background */
+  }
+  if (leftPressed || isMovingLeft) {
+    if (basket.x > 0) {
+      basket.x -= basket.dx;
     }
-    #game-over {
-      display: none;
-      text-align: center;
-      margin-top: 100px;
-    }
-    #game-over h1 {
-      color: #388e3c;
-    }
-    button {
-      padding: 10px 20px;
-      background-color: #388e3c;
-      color: white;
-      border: none;
-      font-size: 18px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #2e7d32;
-    }
-    #controls {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 20px;
-    }
-    #controls button {
-      padding: 15px 25px;
-      background-color: #388e3c;
-      color: white;
-      border: none;
-      font-size: 24px;
-      cursor: pointer;
-      border-radius: 10px;
-    }
-    #controls button:active {
-      background-color: #2e7d32;
-    }
-    @media (min-width: 600px) {
-      #controls {
-        display: none;
+  }
+}
+
+// Draw the basket
+function drawBasket() {
+  ctx.drawImage(basketImg, basket.x, basket.y, basket.width, basket.height);
+}
+
+// Draw falling items
+function drawItems() {
+  fallingItems.forEach(item => {
+    ctx.drawImage(item.img, item.x, item.y, item.width, item.height);
+  });
+}
+
+// Move falling items
+function moveItems() {
+  fallingItems.forEach(item => {
+    item.y += item.dy;
+
+    // Check if item falls below the basket
+    if (item.y + item.height > canvas.height) {
+      fallingItems.splice(fallingItems.indexOf(item), 1);
+      lives--;
+      if (lives === 0) {
+        gameOver = true;
       }
     }
-  </style>
-</head>
-<body>
-  <canvas id="gameCanvas" width="800" height="600"></canvas>
-  <div id="game-over">
-    <h1>Game Over!</h1>
-    <p>Your score: <span id="score">0</span></p>
-    <button onclick="restartGame()">Play Again</button>
-  </div>
-  <div id="controls">
-    <button id="leftBtn">← Left</button>
-    <button id="rightBtn">→ Right</button>
-  </div>
-  <script src="game.js"></script>
-</body>
-</html>
+
+    // Check if item is caught
+    if (
+      item.x > basket.x &&
+      item.x < basket.x + basket.width &&
+      item.y + item.height > basket.y &&
+      item.y < basket.y + basket.height
+    ) {
+      fallingItems.splice(fallingItems.indexOf(item), 1);
+      score++;
+    }
+  });
+}
+
+// Update game state
+function update() {
+  if (!gameOver) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    moveBasket();
+    moveItems();
+    drawBasket();
+    drawItems();
+    ctx.font = '20px Arial';
+    ctx.fillStyle = '#388e3c';
+    ctx.fillText('Score: ' + score, 10, 20);
+    ctx.fillText('Lives: ' + lives, 10, 50);
+
+    requestAnimationFrame(update);
+  } else {
+    document.getElementById('score').innerText = score;
+    document.getElementById('game-over').style.display = 'block';
+  }
+}
+
+// Responsive canvas resizing
+function resizeCanvas() {
+  const aspectRatio = 800 / 600; // Width to height ratio of the game
+  const width = Math.min(window.innerWidth, 800); // Restrict to 800px max width
+  const height = width / aspectRatio;
+
+  canvas.width = width;
+  canvas.height = height;
+
+  // Reposition basket and items based on new dimensions
+  basket.y = canvas.height - 60;
+  fallingItems.forEach(item => {
+    item.x = Math.min(item.x, canvas.width - item.width);
+    item.y = Math.min(item.y, canvas.height - item.height);
+  });
+}
+
+// Call resizeCanvas on window resize
+window.addEventListener('resize', resizeCanvas);
+
+// Start the game
+function startGame() {
+  score = 0;
+  lives = 3;
+  gameOver = false;
+  fallingItems = [];
+  setInterval(createFallingItem, 1000);
+  resizeCanvas(); // Ensure canvas is resized initially
+  update();
+}
+
+// Restart the game
+function restartGame() {
+  document.getElementById('game-over').style.display = 'none';
+  startGame();
+}
+
+// Initialize the game
+startGame();
