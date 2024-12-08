@@ -149,26 +149,6 @@ function update() {
   }
 }
 
-// Responsive canvas resizing
-function resizeCanvas() {
-  const aspectRatio = 800 / 600; // Width to height ratio of the game
-  const width = Math.min(window.innerWidth, 800); // Restrict to 800px max width
-  const height = width / aspectRatio;
-
-  canvas.width = width;
-  canvas.height = height;
-
-  // Reposition basket and items based on new dimensions
-  basket.y = canvas.height - 60;
-  fallingItems.forEach(item => {
-    item.x = Math.min(item.x, canvas.width - item.width);
-    item.y = Math.min(item.y, canvas.height - item.height);
-  });
-}
-
-// Call resizeCanvas on window resize
-window.addEventListener('resize', resizeCanvas);
-
 // Start the game
 function startGame() {
   score = 0;
@@ -176,7 +156,6 @@ function startGame() {
   gameOver = false;
   fallingItems = [];
   setInterval(createFallingItem, 1000);
-  resizeCanvas(); // Ensure canvas is resized initially
   update();
 }
 
@@ -186,5 +165,33 @@ function restartGame() {
   startGame();
 }
 
-// Initialize the game
+// Resize the canvas to be responsive
+function resizeCanvas() {
+  const aspectRatio = 800 / 600; // Width to height ratio of the game
+  const width = Math.min(window.innerWidth, 800); // Restrict to 800px max width
+  const height = width / aspectRatio;
+
+  // Resize the canvas to fit the device screen
+  canvas.width = width;
+  canvas.height = height;
+
+  // Adjust the basket's position relative to the new canvas size
+  basket.width = canvas.width * 0.1; // Basket width relative to canvas
+  basket.height = canvas.height * 0.07; // Basket height relative to canvas
+  basket.y = canvas.height - basket.height - 10; // Position basket near the bottom
+  basket.dx = canvas.width * 0.02; // Movement speed based on canvas size
+
+  // Resize and reposition falling items
+  fallingItems.forEach(item => {
+    item.width = canvas.width * 0.05;
+    item.height = canvas.height * 0.05;
+  });
+}
+
+// Call resizeCanvas on window resize
+window.addEventListener('resize', resizeCanvas);
+
+// Resize canvas initially
+resizeCanvas();
+
 startGame();
