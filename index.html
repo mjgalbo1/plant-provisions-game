@@ -37,6 +37,31 @@
     button:hover {
       background-color: #2e7d32;
     }
+    #controls {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 20px;
+    }
+    #controls button {
+      padding: 15px 25px;
+      background-color: #388e3c;
+      color: white;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      border-radius: 10px;
+    }
+    #controls button:active {
+      background-color: #2e7d32;
+    }
+    @media (min-width: 600px) {
+      #controls {
+        display: none;
+      }
+    }
   </style>
 </head>
 <body>
@@ -45,6 +70,10 @@
     <h1>Game Over!</h1>
     <p>Your score: <span id="score">0</span></p>
     <button onclick="restartGame()">Play Again</button>
+  </div>
+  <div id="controls">
+    <button id="leftBtn">← Left</button>
+    <button id="rightBtn">→ Right</button>
   </div>
   <script src="game.js"></script>
 </body>
