@@ -27,6 +27,10 @@ let leftPressed = false;
 let isMovingLeft = false;
 let isMovingRight = false;
 
+// Modal elements
+const gameModal = document.getElementById('game-modal');
+const scoreDisplay = document.getElementById('score');
+
 // Handle keyboard input
 document.addEventListener('keydown', keyDownHandler);
 document.addEventListener('keyup', keyUpHandler);
@@ -107,7 +111,6 @@ function moveItems() {
   fallingItems.forEach(item => {
     item.y += item.dy;
 
-    // Check if item falls below the basket
     if (item.y + item.height > canvas.height) {
       fallingItems.splice(fallingItems.indexOf(item), 1);
       lives--;
@@ -116,7 +119,6 @@ function moveItems() {
       }
     }
 
-    // Check if item is caught
     if (
       item.x > basket.x &&
       item.x < basket.x + basket.width &&
@@ -137,61 +139,26 @@ function update() {
     moveItems();
     drawBasket();
     drawItems();
-    ctx.font = '20px Arial';
-    ctx.fillStyle = '#388e3c';
-    ctx.fillText('Score: ' + score, 10, 20);
-    ctx.fillText('Lives: ' + lives, 10, 50);
-
     requestAnimationFrame(update);
   } else {
-    document.getElementById('score').innerText = score;
-    document.getElementById('game-over').style.display = 'block';
+    scoreDisplay.innerText = score;
+    gameModal.style.display = 'flex';
   }
 }
 
-// Start the game
 function startGame() {
   score = 0;
   lives = 3;
   gameOver = false;
   fallingItems = [];
+  gameModal.style.display = 'none';
   setInterval(createFallingItem, 1000);
   update();
 }
 
-// Restart the game
 function restartGame() {
-  document.getElementById('game-over').style.display = 'none';
   startGame();
 }
 
-// Resize the canvas to be responsive
-function resizeCanvas() {
-  const aspectRatio = 800 / 600; // Width to height ratio of the game
-  const width = Math.min(window.innerWidth, 800); // Restrict to 800px max width
-  const height = width / aspectRatio;
-
-  // Resize the canvas to fit the device screen
-  canvas.width = width;
-  canvas.height = height;
-
-  // Adjust the basket's position relative to the new canvas size
-  basket.width = canvas.width * 0.1; // Basket width relative to canvas
-  basket.height = canvas.height * 0.07; // Basket height relative to canvas
-  basket.y = canvas.height - basket.height - 10; // Position basket near the bottom
-  basket.dx = canvas.width * 0.02; // Movement speed based on canvas size
-
-  // Resize and reposition falling items
-  fallingItems.forEach(item => {
-    item.width = canvas.width * 0.05;
-    item.height = canvas.height * 0.05;
-  });
-}
-
-// Call resizeCanvas on window resize
-window.addEventListener('resize', resizeCanvas);
-
-// Resize canvas initially
 resizeCanvas();
-
 startGame();
