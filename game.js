@@ -14,59 +14,41 @@ let score = 0;
 let lives = 3;
 let gameOver = false;
 
-// Vegan items image
+// Image assets
 const items = ['sandwich.png', 'wrap.png', 'salad.png'];
 const basketImg = new Image();
 basketImg.src = 'basket.png';
 
-// Keyboard controls
-let rightPressed = false;
-let leftPressed = false;
+basketImg.onload = function() {
+  startGame();
+};
 
-// Mobile button controls
-let isMovingLeft = false;
-let isMovingRight = false;
-
-// Modal elements
 const gameModal = document.getElementById('game-modal');
 const scoreDisplay = document.getElementById('score');
 
-// Handle keyboard input
+// Event listeners for controls
 document.addEventListener('keydown', keyDownHandler);
 document.addEventListener('keyup', keyUpHandler);
+window.addEventListener('resize', resizeCanvas);
 
 function keyDownHandler(e) {
-  if (e.key === 'Right' || e.key === 'ArrowRight') {
-    rightPressed = true;
-  } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
-    leftPressed = true;
-  }
+  if (e.key === 'Right' || e.key === 'ArrowRight') rightPressed = true;
+  if (e.key === 'Left' || e.key === 'ArrowLeft') leftPressed = true;
 }
 
 function keyUpHandler(e) {
-  if (e.key === 'Right' || e.key === 'ArrowRight') {
-    rightPressed = false;
-  } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
-    leftPressed = false;
-  }
+  if (e.key === 'Right' || e.key === 'ArrowRight') rightPressed = false;
+  if (e.key === 'Left' || e.key === 'ArrowLeft') leftPressed = false;
 }
 
-// Mobile button event listeners
-document.getElementById('leftBtn').addEventListener('touchstart', function() {
-  isMovingLeft = true;
-});
-document.getElementById('leftBtn').addEventListener('touchend', function() {
-  isMovingLeft = false;
-});
+function resizeCanvas() {
+  const aspectRatio = 800 / 600;
+  const width = Math.min(window.innerWidth, 800);
+  const height = width / aspectRatio;
+  canvas.width = width;
+  canvas.height = height;
+}
 
-document.getElementById('rightBtn').addEventListener('touchstart', function() {
-  isMovingRight = true;
-});
-document.getElementById('rightBtn').addEventListener('touchend', function() {
-  isMovingRight = false;
-});
-
-// Create falling items
 function createFallingItem() {
   const item = {
     x: Math.random() * (canvas.width - 40),
@@ -80,33 +62,21 @@ function createFallingItem() {
   fallingItems.push(item);
 }
 
-// Move the basket
 function moveBasket() {
-  if (rightPressed || isMovingRight) {
-    if (basket.x < canvas.width - basket.width) {
-      basket.x += basket.dx;
-    }
-  }
-  if (leftPressed || isMovingLeft) {
-    if (basket.x > 0) {
-      basket.x -= basket.dx;
-    }
-  }
+  if (rightPressed) basket.x += basket.dx;
+  if (leftPressed) basket.x -= basket.dx;
 }
 
-// Draw the basket
 function drawBasket() {
   ctx.drawImage(basketImg, basket.x, basket.y, basket.width, basket.height);
 }
 
-// Draw falling items
 function drawItems() {
   fallingItems.forEach(item => {
     ctx.drawImage(item.img, item.x, item.y, item.width, item.height);
   });
 }
 
-// Move falling items
 function moveItems() {
   fallingItems.forEach(item => {
     item.y += item.dy;
@@ -114,24 +84,16 @@ function moveItems() {
     if (item.y + item.height > canvas.height) {
       fallingItems.splice(fallingItems.indexOf(item), 1);
       lives--;
-      if (lives === 0) {
-        gameOver = true;
-      }
+      if (lives === 0) gameOver = true;
     }
 
-    if (
-      item.x > basket.x &&
-      item.x < basket.x + basket.width &&
-      item.y + item.height > basket.y &&
-      item.y < basket.y + basket.height
-    ) {
+    if (item.x > basket.x && item.x < basket.x + basket.width && item.y + item.height > basket.y) {
       fallingItems.splice(fallingItems.indexOf(item), 1);
       score++;
     }
   });
 }
 
-// Update game state
 function update() {
   if (!gameOver) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -147,6 +109,8 @@ function update() {
 }
 
 function startGame() {
+  console.log("Game started");
+  resizeCanvas();
   score = 0;
   lives = 3;
   gameOver = false;
@@ -155,10 +119,3 @@ function startGame() {
   setInterval(createFallingItem, 1000);
   update();
 }
-
-function restartGame() {
-  startGame();
-}
-
-resizeCanvas();
-startGame();
