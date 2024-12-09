@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Plant Provisions Catch Game</title>
   <style>
     body {
@@ -20,25 +20,86 @@
       height: auto; /* Maintain aspect ratio */
       max-width: 800px; /* Restrict to max game width */
     }
+
+    /* Modal styles for the game-over screen */
     #game-over {
       display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    #game-over-content {
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
       text-align: center;
-      margin-top: 100px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      width: 80%;
+      max-width: 400px;
     }
-    #game-over h1 {
+
+    #game-over-content h1 {
       color: #388e3c;
+      margin-bottom: 20px;
     }
-    button {
+
+    #game-over-content p {
+      margin-bottom: 20px;
+      font-size: 18px;
+      color: #333;
+    }
+
+    #game-over-content form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    #game-over-content form input[type="text"],
+    #game-over-content form input[type="email"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    #game-over-content form input[type="submit"] {
       padding: 10px 20px;
       background-color: #388e3c;
       color: white;
       border: none;
       font-size: 18px;
       cursor: pointer;
+      border-radius: 5px;
     }
-    button:hover {
+
+    #game-over-content form input[type="submit"]:hover {
       background-color: #2e7d32;
     }
+
+    #game-over-content button {
+      padding: 10px 20px;
+      background-color: #388e3c;
+      color: white;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    #game-over-content button:hover {
+      background-color: #2e7d32;
+    }
+
     #controls {
       position: absolute;
       bottom: 20px;
@@ -47,6 +108,7 @@
       display: flex;
       gap: 20px;
     }
+
     #controls button {
       padding: 15px 25px;
       background-color: #388e3c;
@@ -56,23 +118,39 @@
       cursor: pointer;
       border-radius: 10px;
     }
+
     #controls button:active {
       background-color: #2e7d32;
     }
+
     @media (min-width: 600px) {
       #controls {
         display: none;
       }
     }
+
   </style>
 </head>
 <body>
   <canvas id="gameCanvas"></canvas>
+
+  <!-- Modal Overlay for Game Over -->
   <div id="game-over">
-    <h1>Game Over!</h1>
-    <p>Your score: <span id="score">0</span></p>
-    <button onclick="restartGame()">Play Again</button>
+    <div id="game-over-content">
+      <h1>Game Over!</h1>
+      <p>Your score: <span id="score">0</span></p>
+      <p>High score: <span id="high-score">0</span></p>
+      <form id="score-form" action="<https://docs.google.com/forms/d/1oAyNEATA6tX7mwr-baH386vpQQEXH-banbolzwHxHLk/prefill>" method="POST" target="_blank">
+        <!-- Replace 'entry.yourFieldID' with your actual field names from Google Form -->
+        <input type="text" name="entry.1892722598" placeholder="Your Name" required />
+        <input type="email" name="entry.1920558903" placeholder="Your Email" required />
+        <input type="hidden" name="entry.1238251265" id="hidden-score" value="0" />
+        <input type="submit" value="Submit Score" />
+      </form>
+      <button onclick="restartGame()">Play Again</button>
+    </div>
   </div>
+
   <div id="controls">
     <button id="leftBtn">← Left</button>
     <button id="rightBtn">→ Right</button>
