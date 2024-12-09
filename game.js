@@ -13,6 +13,7 @@ let fallingItems = [];
 let score = 0;
 let lives = 3;
 let gameOver = false;
+let highScore = localStorage.getItem('highScore') || 0;
 
 // Vegan items image
 const items = ['sandwich.png', 'wrap.png', 'salad.png'];
@@ -62,7 +63,6 @@ document.getElementById('rightBtn').addEventListener('touchend', function() {
   isMovingRight = false;
 });
 
-// Create falling items
 function createFallingItem() {
   const item = {
     x: Math.random() * (canvas.width - 40),
@@ -76,7 +76,6 @@ function createFallingItem() {
   fallingItems.push(item);
 }
 
-// Move the basket
 function moveBasket() {
   if (rightPressed || isMovingRight) {
     if (basket.x < canvas.width - basket.width) {
@@ -90,19 +89,16 @@ function moveBasket() {
   }
 }
 
-// Draw the basket
 function drawBasket() {
   ctx.drawImage(basketImg, basket.x, basket.y, basket.width, basket.height);
 }
 
-// Draw falling items
 function drawItems() {
   fallingItems.forEach(item => {
     ctx.drawImage(item.img, item.x, item.y, item.width, item.height);
   });
 }
 
-// Move falling items
 function moveItems() {
   fallingItems.forEach(item => {
     item.y += item.dy;
@@ -129,7 +125,6 @@ function moveItems() {
   });
 }
 
-// Update game state
 function update() {
   if (!gameOver) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -144,12 +139,23 @@ function update() {
 
     requestAnimationFrame(update);
   } else {
-    document.getElementById('score').innerText = score;
-    document.getElementById('game-over').style.display = 'block';
+    endGame();
   }
 }
 
-// Start the game
+function endGame() {
+  // Update high score if current score is higher
+  if (score > highScore) {
+    highScore = score;
+    localStorage.setItem('highScore', highScore);
+  }
+
+  document.getElementById('score').innerText = score;
+  document.getElementById('high-score').innerText = highScore;
+  document.getElementById('hidden-score').value = score;
+  document.getElementById('game-over').style.display = 'flex';
+}
+
 function startGame() {
   score = 0;
   lives = 3;
@@ -159,39 +165,30 @@ function startGame() {
   update();
 }
 
-// Restart the game
 function restartGame() {
   document.getElementById('game-over').style.display = 'none';
   startGame();
 }
 
-// Resize the canvas to be responsive
 function resizeCanvas() {
-  const aspectRatio = 800 / 600; // Width to height ratio of the game
-  const width = Math.min(window.innerWidth, 800); // Restrict to 800px max width
+  const aspectRatio = 800 / 600; 
+  const width = Math.min(window.innerWidth, 800); 
   const height = width / aspectRatio;
 
-  // Resize the canvas to fit the device screen
   canvas.width = width;
   canvas.height = height;
 
-  // Adjust the basket's position relative to the new canvas size
-  basket.width = canvas.width * 0.1; // Basket width relative to canvas
-  basket.height = canvas.height * 0.07; // Basket height relative to canvas
-  basket.y = canvas.height - basket.height - 10; // Position basket near the bottom
-  basket.dx = canvas.width * 0.02; // Movement speed based on canvas size
+  basket.width = canvas.width * 0.1; 
+  basket.height = canvas.height * 0.07; 
+  basket.y = canvas.height - basket.height - 10;
+  basket.dx = canvas.width * 0.02; 
 
-  // Resize and reposition falling items
   fallingItems.forEach(item => {
     item.width = canvas.width * 0.05;
     item.height = canvas.height * 0.05;
   });
 }
 
-// Call resizeCanvas on window resize
 window.addEventListener('resize', resizeCanvas);
-
-// Resize canvas initially
 resizeCanvas();
-
 startGame();
