@@ -9,7 +9,9 @@
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
-      background-color: #e8f5e9; /* Light green background */
+      /* Add the background logo image */
+      background: #e8f5e9 url('logo.png') no-repeat center center;
+      background-size: contain; 
       overflow: hidden;
     }
     canvas {
@@ -141,7 +143,6 @@
       <p>Your score: <span id="score">0</span></p>
       <p>High score: <span id="high-score">0</span></p>
       <form id="score-form" action="https://docs.google.com/forms/d/e/1FAIpQLSeBqwbR-oyVoWeNDl_kUtN9GngkIqoLNsnmxVxeMRxsMSKoyA/formResponse" method="POST" target="_blank">
-        <!-- Replace 'entry.yourFieldID' with your actual field names from Google Form -->
         <input type="text" name="entry.1892722598" placeholder="Your Name" required />
         <input type="email" name="entry.1920558903" placeholder="Your Email" required />
         <input type="hidden" name="entry.1238251265" id="hidden-score" value="0" />

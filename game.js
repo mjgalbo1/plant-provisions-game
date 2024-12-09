@@ -15,8 +15,8 @@ let lives = 3;
 let gameOver = false;
 let highScore = localStorage.getItem('highScore') || 0;
 
-// Vegan items image
-const items = ['sandwich.png', 'wrap.png', 'salad.png'];
+// Updated items to tomato, carrot, beet, pepper
+const items = ['tomato.png', 'carrot.png', 'beet.png', 'pepper.png'];
 const basketImg = new Image();
 basketImg.src = 'basket.png';
 
@@ -67,8 +67,8 @@ function createFallingItem() {
   const item = {
     x: Math.random() * (canvas.width - 40),
     y: 0,
-    width: 40,
-    height: 40,
+    width: 40,   // Set to a square dimension
+    height: 40,  // to maintain a 1:1 aspect ratio
     dy: 3,
     img: new Image()
   };
@@ -178,8 +178,9 @@ function resizeCanvas() {
   canvas.width = width;
   canvas.height = height;
 
-  basket.width = canvas.width * 0.1; 
-  basket.height = canvas.height * 0.07; 
+  // Make the basket 1.5x bigger than before
+  basket.width = canvas.width * 0.1 * 1.5;     // originally 0.1
+  basket.height = canvas.height * 0.1 * 1.5;  // originally 0.07
   basket.y = canvas.height - basket.height - 10;
   basket.dx = canvas.width * 0.02; 
 
