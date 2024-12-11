@@ -65,10 +65,10 @@ document.getElementById('rightBtn').addEventListener('touchend', function() {
 
 function createFallingItem() {
   const item = {
-    x: Math.random() * (canvas.width - 40),
+    x: Math.random() * (canvas.width - 80), // Adjusted for new item width
     y: 0,
-    width: 40,   // Set to a square dimension
-    height: 40,  // to maintain a 1:1 aspect ratio
+    width: 80,   // Doubled from 40
+    height: 80,  // Doubled from 40
     dy: 3,
     img: new Image()
   };
@@ -180,13 +180,14 @@ function resizeCanvas() {
 
   // Make the basket 1.5x bigger than before
   basket.width = canvas.width * 0.1 * 1.5;     // originally 0.1
-  basket.height = canvas.height * 0.1 * 1.5;  // originally 0.07
+  basket.height = canvas.height * 0.1 * 1.5;   // originally 0.07
   basket.y = canvas.height - basket.height - 10;
   basket.dx = canvas.width * 0.02; 
 
+  // Double the size of the items relative to the canvas size
   fallingItems.forEach(item => {
-    item.width = canvas.width * 0.05;
-    item.height = canvas.height * 0.05;
+    item.width = canvas.width * 0.1;   // was 0.05, now doubled
+    item.height = canvas.height * 0.1; // was 0.05, now doubled
   });
 }
 
