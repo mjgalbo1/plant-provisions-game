@@ -15,7 +15,6 @@ let lives = 3;
 let gameOver = false;
 let highScore = localStorage.getItem('highScore') || 0;
 
-// Updated items to tomato, carrot, beet, pepper
 const items = ['tomato.png', 'carrot.png', 'beet.png', 'pepper.png'];
 const basketImg = new Image();
 basketImg.src = 'basket.png';
@@ -65,10 +64,10 @@ document.getElementById('rightBtn').addEventListener('touchend', function() {
 
 function createFallingItem() {
   const item = {
-    x: Math.random() * (canvas.width - 80), // Adjusted for new item width
+    x: Math.random() * (canvas.width - 80),
     y: 0,
-    width: 80,   // Doubled from 40
-    height: 80,  // Doubled from 40
+    width: 80,   // Double original size
+    height: 80,  // Double original size
     dy: 3,
     img: new Image()
   };
@@ -103,7 +102,7 @@ function moveItems() {
   fallingItems.forEach(item => {
     item.y += item.dy;
 
-    // Check if item falls below the basket
+    // Check if item falls below the basket (missed)
     if (item.y + item.height > canvas.height) {
       fallingItems.splice(fallingItems.indexOf(item), 1);
       lives--;
@@ -112,7 +111,7 @@ function moveItems() {
       }
     }
 
-    // Check if item is caught
+    // Check if item is caught by the basket
     if (
       item.x > basket.x &&
       item.x < basket.x + basket.width &&
@@ -144,14 +143,13 @@ function update() {
 }
 
 function endGame() {
-  // Update high score if current score is higher
   if (score > highScore) {
     highScore = score;
     localStorage.setItem('highScore', highScore);
   }
 
   document.getElementById('score').innerText = score;
-  document.getElementById('high-score').innerText = highScore;
+  // No longer updating high score on the modal since it's removed
   document.getElementById('hidden-score').value = score;
   document.getElementById('game-over').style.display = 'flex';
 }
@@ -171,23 +169,32 @@ function restartGame() {
 }
 
 function resizeCanvas() {
-  const aspectRatio = 800 / 600; 
-  const width = Math.min(window.innerWidth, 800); 
-  const height = width / aspectRatio;
+  let width = Math.min(window.innerWidth, 800);
+
+  // If on mobile (width < 600), use full available height to make the game taller.
+  // Otherwise, maintain original aspect ratio.
+  if (width < 600) {
+    // Mobile: use full device height
+    var height = window.innerHeight;
+  } else {
+    // Desktop: maintain original aspect ratio of 800/600
+    const aspectRatio = 800 / 600; 
+    var height = width / aspectRatio;
+  }
 
   canvas.width = width;
   canvas.height = height;
 
-  // Make the basket 1.5x bigger than before
-  basket.width = canvas.width * 0.1 * 1.5;     // originally 0.1
-  basket.height = canvas.height * 0.1 * 1.5;   // originally 0.07
+  // Update basket dimensions and position
+  basket.width = canvas.width * 0.1 * 1.5;
+  basket.height = canvas.height * 0.1 * 1.5;
   basket.y = canvas.height - basket.height - 10;
   basket.dx = canvas.width * 0.02; 
 
-  // Double the size of the items relative to the canvas size
+  // Update items size
   fallingItems.forEach(item => {
-    item.width = canvas.width * 0.1;   // was 0.05, now doubled
-    item.height = canvas.height * 0.1; // was 0.05, now doubled
+    item.width = canvas.width * 0.1;
+    item.height = canvas.height * 0.1;
   });
 }
 
