@@ -14,6 +14,7 @@
       background-size: contain; 
       overflow: hidden;
     }
+
     canvas {
       display: block;
       margin: 0 auto;
@@ -103,12 +104,11 @@
     }
 
     #controls {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
       display: flex;
+      justify-content: center;
       gap: 20px;
+      margin: 20px auto;
+      max-width: 800px;
     }
 
     #controls button {
@@ -141,7 +141,6 @@
     <div id="game-over-content">
       <h1>Game Over!</h1>
       <p>Your score: <span id="score">0</span></p>
-      <p>Your highest score: <span id="high-score">0</span></p>
       <form id="score-form" action="https://docs.google.com/forms/d/e/1FAIpQLSeBqwbR-oyVoWeNDl_kUtN9GngkIqoLNsnmxVxeMRxsMSKoyA/formResponse" method="POST" target="_blank">
         <input type="text" name="entry.1892722598" placeholder="Your Name" required />
         <input type="email" name="entry.1920558903" placeholder="Your Email" required />
@@ -153,9 +152,11 @@
   </div>
 
   <div id="controls">
-    <button id="leftBtn">← Left</button>
-    <button id="rightBtn">→ Right</button>
+    <!-- Removed "Left" and "Right" text, only arrows remain -->
+    <button id="leftBtn">←</button>
+    <button id="rightBtn">→</button>
   </div>
+
   <script src="game.js"></script>
 </body>
 </html>
