@@ -1,162 +1,203 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Plant Provisions Catch Game</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      /* Add the background logo image */
-      background: #e8f5e9 url('logo.png') no-repeat center center;
-      background-size: contain; 
-      overflow: hidden;
-    }
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
 
-    canvas {
-      display: block;
-      margin: 0 auto;
-      background-color: #ffffff; /* White background */
-      width: 100%; /* Make canvas responsive */
-      height: auto; /* Maintain aspect ratio */
-      max-width: 800px; /* Restrict to max game width */
-    }
+// Game variables
+let basket = {
+  x: canvas.width / 2 - 40,
+  y: canvas.height - 60,
+  width: 80,
+  height: 40,
+  dx: 7
+};
+let fallingItems = [];
+let score = 0;
+let lives = 3;
+let gameOver = false;
+let highScore = localStorage.getItem('highScore') || 0;
 
-    /* Modal styles for the game-over screen */
-    #game-over {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0,0,0,0.7);
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
+const items = ['tomato.png', 'carrot.png', 'beet.png', 'pepper.png'];
+const basketImg = new Image();
+basketImg.src = 'basket.png';
 
-    #game-over-content {
-      background: #fff;
-      padding: 30px;
-      border-radius: 10px;
-      text-align: center;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
-      width: 80%;
-      max-width: 400px;
-    }
+// Keyboard controls
+let rightPressed = false;
+let leftPressed = false;
 
-    #game-over-content h1 {
-      color: #388e3c;
-      margin-bottom: 20px;
-    }
+// Mobile button controls
+let isMovingLeft = false;
+let isMovingRight = false;
 
-    #game-over-content p {
-      margin-bottom: 20px;
-      font-size: 18px;
-      color: #333;
-    }
+// Handle keyboard input
+document.addEventListener('keydown', keyDownHandler);
+document.addEventListener('keyup', keyUpHandler);
 
-    #game-over-content form {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
+function keyDownHandler(e) {
+  if (e.key === 'Right' || e.key === 'ArrowRight') {
+    rightPressed = true;
+  } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
+    leftPressed = true;
+  }
+}
 
-    #game-over-content form input[type="text"],
-    #game-over-content form input[type="email"] {
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
+function keyUpHandler(e) {
+  if (e.key === 'Right' || e.key === 'ArrowRight') {
+    rightPressed = false;
+  } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
+    leftPressed = false;
+  }
+}
 
-    #game-over-content form input[type="submit"] {
-      padding: 10px 20px;
-      background-color: #388e3c;
-      color: white;
-      border: none;
-      font-size: 18px;
-      cursor: pointer;
-      border-radius: 5px;
-    }
+// Mobile button event listeners
+document.getElementById('leftBtn').addEventListener('touchstart', function() {
+  isMovingLeft = true;
+});
+document.getElementById('leftBtn').addEventListener('touchend', function() {
+  isMovingLeft = false;
+});
 
-    #game-over-content form input[type="submit"]:hover {
-      background-color: #2e7d32;
-    }
+document.getElementById('rightBtn').addEventListener('touchstart', function() {
+  isMovingRight = true;
+});
+document.getElementById('rightBtn').addEventListener('touchend', function() {
+  isMovingRight = false;
+});
 
-    #game-over-content button {
-      padding: 10px 20px;
-      background-color: #388e3c;
-      color: white;
-      border: none;
-      font-size: 18px;
-      cursor: pointer;
-      border-radius: 5px;
-    }
+function createFallingItem() {
+  const item = {
+    x: Math.random() * (canvas.width - 80),
+    y: 0,
+    width: 80,   // Double original size
+    height: 80,  // Double original size
+    dy: 3,
+    img: new Image()
+  };
+  item.img.src = items[Math.floor(Math.random() * items.length)];
+  fallingItems.push(item);
+}
 
-    #game-over-content button:hover {
-      background-color: #2e7d32;
+function moveBasket() {
+  if (rightPressed || isMovingRight) {
+    if (basket.x < canvas.width - basket.width) {
+      basket.x += basket.dx;
     }
-
-    #controls {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      margin: 20px auto;
-      max-width: 800px;
+  }
+  if (leftPressed || isMovingLeft) {
+    if (basket.x > 0) {
+      basket.x -= basket.dx;
     }
+  }
+}
 
-    #controls button {
-      padding: 15px 25px;
-      background-color: #388e3c;
-      color: white;
-      border: none;
-      font-size: 24px;
-      cursor: pointer;
-      border-radius: 10px;
-    }
+function drawBasket() {
+  ctx.drawImage(basketImg, basket.x, basket.y, basket.width, basket.height);
+}
 
-    #controls button:active {
-      background-color: #2e7d32;
-    }
+function drawItems() {
+  fallingItems.forEach(item => {
+    ctx.drawImage(item.img, item.x, item.y, item.width, item.height);
+  });
+}
 
-    @media (min-width: 600px) {
-      #controls {
-        display: none;
+function moveItems() {
+  fallingItems.forEach(item => {
+    item.y += item.dy;
+
+    // Check if item falls below the basket (missed)
+    if (item.y + item.height > canvas.height) {
+      fallingItems.splice(fallingItems.indexOf(item), 1);
+      lives--;
+      if (lives === 0) {
+        gameOver = true;
       }
     }
 
-  </style>
-</head>
-<body>
-  <canvas id="gameCanvas"></canvas>
+    // Check if item is caught by the basket
+    if (
+      item.x > basket.x &&
+      item.x < basket.x + basket.width &&
+      item.y + item.height > basket.y &&
+      item.y < basket.y + basket.height
+    ) {
+      fallingItems.splice(fallingItems.indexOf(item), 1);
+      score++;
+    }
+  });
+}
 
-  <!-- Modal Overlay for Game Over -->
-  <div id="game-over">
-    <div id="game-over-content">
-      <h1>Game Over!</h1>
-      <p>Your score: <span id="score">0</span></p>
-      <form id="score-form" action="https://docs.google.com/forms/d/e/1FAIpQLSeBqwbR-oyVoWeNDl_kUtN9GngkIqoLNsnmxVxeMRxsMSKoyA/formResponse" method="POST" target="_blank">
-        <input type="text" name="entry.1892722598" placeholder="Your Name" required />
-        <input type="email" name="entry.1920558903" placeholder="Your Email" required />
-        <input type="hidden" name="entry.1238251265" id="hidden-score" value="0" />
-        <input type="submit" value="Submit Score" />
-      </form>
-      <button onclick="restartGame()">Play Again</button>
-    </div>
-  </div>
+function update() {
+  if (!gameOver) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    moveBasket();
+    moveItems();
+    drawBasket();
+    drawItems();
+    ctx.font = '20px Arial';
+    ctx.fillStyle = '#388e3c';
+    ctx.fillText('Score: ' + score, 10, 20);
+    ctx.fillText('Lives: ' + lives, 10, 50);
 
-  <div id="controls">
-    <!-- Removed "Left" and "Right" text, only arrows remain -->
-    <button id="leftBtn">←</button>
-    <button id="rightBtn">→</button>
-  </div>
+    requestAnimationFrame(update);
+  } else {
+    endGame();
+  }
+}
 
-  <script src="game.js"></script>
-</body>
-</html>
+function endGame() {
+  if (score > highScore) {
+    highScore = score;
+    localStorage.setItem('highScore', highScore);
+  }
+
+  document.getElementById('score').innerText = score;
+  // No longer updating high score on the modal since it's removed
+  document.getElementById('hidden-score').value = score;
+  document.getElementById('game-over').style.display = 'flex';
+}
+
+function startGame() {
+  score = 0;
+  lives = 3;
+  gameOver = false;
+  fallingItems = [];
+  setInterval(createFallingItem, 1000);
+  update();
+}
+
+function restartGame() {
+  document.getElementById('game-over').style.display = 'none';
+  startGame();
+}
+
+function resizeCanvas() {
+  let width = Math.min(window.innerWidth, 800);
+
+  // If on mobile (width < 600), use full available height to make the game taller.
+  // Otherwise, maintain original aspect ratio.
+  if (width < 600) {
+    // Mobile: use full device height
+    var height = window.innerHeight;
+  } else {
+    // Desktop: maintain original aspect ratio of 800/600
+    const aspectRatio = 800 / 600; 
+    var height = width / aspectRatio;
+  }
+
+  canvas.width = width;
+  canvas.height = height;
+
+  // Update basket dimensions and position
+  basket.width = canvas.width * 0.1 * 1.5;
+  basket.height = canvas.height * 0.1 * 1.5;
+  basket.y = canvas.height - basket.height - 10;
+  basket.dx = canvas.width * 0.02; 
+
+  // Update items size
+  fallingItems.forEach(item => {
+    item.width = canvas.width * 0.1;
+    item.height = canvas.height * 0.1;
+  });
+}
+
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+startGame();
